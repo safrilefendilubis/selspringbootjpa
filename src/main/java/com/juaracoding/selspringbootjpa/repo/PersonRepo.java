@@ -15,5 +15,5 @@ import java.util.List;
 
 public interface PersonRepo extends JpaRepository<Person,Long> {
 
-    List<Person> findByFrirstName(String val);
+//    List<Person> findByFrirstName(String val);
 }

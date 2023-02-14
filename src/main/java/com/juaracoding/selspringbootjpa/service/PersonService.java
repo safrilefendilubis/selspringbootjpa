@@ -15,24 +15,24 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 
-@Service
-@Transactional
-public class PersonService {
-
-    private PersonRepo personRepo;
-
-    public PersonService(PersonRepo personRepo) {
-        this.personRepo = personRepo;
-    }
-
-    public void savePerson(Person person){
-        personRepo.save(person);
-        personRepo.findAll();
-        personRepo.findByFrirstName(person.getFirstName());
-
-    }
-
-    public List<Person> findByName(Person person){
-        return personRepo.findByFrirstName(person.getFirstName());
-    }
-}
+//@Service
+//@Transactional
+//public class PersonService {
+//
+//    private PersonRepo personRepo;
+//
+//    public PersonService(PersonRepo personRepo) {
+//        this.personRepo = personRepo;
+//    }
+//
+//    public void savePerson(Person person){
+//        personRepo.save(person);
+//        personRepo.findAll();
+//        personRepo.findByFrirstName(person.getFirstName());
+//
+//    }
+//
+//    public List<Person> findByName(Person person){
+//        return personRepo.findByFrirstName(person.getFirstName());
+//    }
+//}
