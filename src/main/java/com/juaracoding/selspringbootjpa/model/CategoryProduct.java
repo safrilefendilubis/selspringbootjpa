@@ -18,16 +18,17 @@ import java.util.Date;
 @Entity
 @Table(name = "MstCategoryProduct")
 public class CategoryProduct {
-    @Column(name = "CreatedDate")
+    @Column(name = "CreatedDate",nullable = false)
     private Date createdDate = new Date();
-    @Column(name = "CreatedBy")
-    private Date createdBy;
+    @Column(name = "CreatedBy",nullable = false)
+    private int createdBy ;
     @Column(name = "ModifiedDate")
     private Date modifiedDate;
     @Column(name = "ModifiedBy")
     private Integer modifiedBy;
+
     @Column(name = "IsDelete")
-    private boolean isDelete = true;
+    private Byte isDelete = 1;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IDCategoryProduct")
@@ -42,16 +43,6 @@ public class CategoryProduct {
     @Length(message = ConstantMessage.WARNING_CATPROD_MAX_LENGTH_DESC, max = 500)
     @Column(name = "DescCategoryProduct", nullable = false, length = 500)
     private String strDescCategoryProduct;
-    @Column(name = "StrFrom")
-    private String strFrom;
-
-    public String getStrFrom() {
-        return strFrom;
-    }
-
-    public void setStrFrom(String from) {
-        this.strFrom = from;
-    }
 
     public Date getCreatedDate() {
         return createdDate;
@@ -61,11 +52,11 @@ public class CategoryProduct {
         this.createdDate = createdDate;
     }
 
-    public Date getCreatedBy() {
+    public int getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Date createdBy) {
+    public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -85,12 +76,12 @@ public class CategoryProduct {
         this.modifiedBy = modifiedBy;
     }
 
-    public boolean isDelete() {
+    public Byte getIsDelete() {
         return isDelete;
     }
 
-    public void setDelete(boolean delete) {
-        isDelete = delete;
+    public void setIsDelete(Byte isDelete) {
+        this.isDelete = isDelete;
     }
 
     public Long getIdCategoryProduct() {

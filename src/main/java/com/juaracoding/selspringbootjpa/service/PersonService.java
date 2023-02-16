@@ -28,11 +28,11 @@ import java.util.List;
 //    public void savePerson(Person person){
 //        personRepo.save(person);
 //        personRepo.findAll();
-//        personRepo.findByFrirstName(person.getFirstName());
+//        personRepo.findByFirstName(person.getFirstName());
 //
 //    }
 //
 //    public List<Person> findByName(Person person){
-//        return personRepo.findByFrirstName(person.getFirstName());
+//        return personRepo.findByFirstName(person.getFirstName());
 //    }
 //}

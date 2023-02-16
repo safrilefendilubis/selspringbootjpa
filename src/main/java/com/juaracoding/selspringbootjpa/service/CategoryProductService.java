@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import java.io.IOError;
+import java.io.IOException;
+import java.sql.SQLDataException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -39,15 +42,21 @@ public class CategoryProductService {
         categoryProductRepo.save(categoryProduct);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void saveAllCategory(List<CategoryProduct> listCategoryProduct){
         categoryProductRepo.saveAll(listCategoryProduct);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
+    public List<CategoryProduct> saveUploadFile(List<CategoryProduct> listCategoryProduct){
+        return categoryProductRepo.saveAll(listCategoryProduct);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public void updateCategory(CategoryProduct categoryProduct,Long id) throws  Exception
     {
         CategoryProduct cProduct = categoryProductRepo.findById(id).orElseThrow (
-                ()->  new ResourceNotFoundException(ConstantMessage.WELCOME_MESSAGE)
+                ()->  new ResourceNotFoundException("Data tidak ditemukan")
         );
 
         /*
