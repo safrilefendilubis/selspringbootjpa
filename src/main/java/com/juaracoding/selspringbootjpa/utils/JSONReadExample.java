@@ -28,7 +28,7 @@ public class JSONReadExample {
         // getting age
         long age = (long) jo.get("age");
         System.out.println(age);
-          
+
         // getting address
         Map address = ((Map)jo.get("address"));
           
