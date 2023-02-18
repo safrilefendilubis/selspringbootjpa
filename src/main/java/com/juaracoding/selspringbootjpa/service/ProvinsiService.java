@@ -33,6 +33,12 @@ public class ProvinsiService {
     private ProvinsiRepo provinsiRepo;
     private String [] strExceptionArr = new String[2];
 
+    @Autowired
+    public ProvinsiService(ProvinsiRepo provinsiRepo) {
+        strExceptionArr[0] = "ProvinsiService";
+        this.provinsiRepo = provinsiRepo;
+    }
+
     public ResponseEntity<Object> saveProvinsi(Provinsi provinsi)
     {
         String strMessage = ConstantMessage.SUCCESS_SAVE;

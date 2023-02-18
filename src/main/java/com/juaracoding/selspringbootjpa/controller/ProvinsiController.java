@@ -45,7 +45,7 @@ public class ProvinsiController {
     }
 
     @PostMapping("/v1/svpl")
-    public ResponseEntity<Object> saveCategoryList(@Valid@RequestBody List<Provinsi> listProvinsi){
+    public ResponseEntity<Object> saveProvinsiList(@Valid@RequestBody List<Provinsi> listProvinsi){
 
         provinsiService.saveAllProvinsi(listProvinsi);
 
