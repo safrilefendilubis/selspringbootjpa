@@ -21,12 +21,13 @@ public class Product {
     @Column(name = "CreatedDate", nullable = false)
     private Date createdDate = new Date();
     @Column(name = "CreatedBy", nullable = false)
-    private int createdBy;
+    private Integer createdBy;
     @Column(name = "ModifiedDate")
     private Date modifiedDate;
     @Column(name = "ModifiedBy")
     private Integer modifiedBy;
-    @Column(name = "IsDelete")
+
+    @Column(name = "IsDelete", nullable = false)
     private Byte isDelete = 1;
 
     @Id
@@ -54,11 +55,11 @@ public class Product {
         this.createdDate = createdDate;
     }
 
-    public int getCreatedBy() {
+    public Integer getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(int createdBy) {
+    public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
     }
 

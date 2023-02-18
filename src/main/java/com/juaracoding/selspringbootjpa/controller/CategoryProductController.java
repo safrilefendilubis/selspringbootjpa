@@ -19,6 +19,7 @@ import com.juaracoding.selspringbootjpa.model.CategoryProduct;
 import com.juaracoding.selspringbootjpa.service.CategoryProductService;
 import com.juaracoding.selspringbootjpa.utils.ConstantMessage;
 import com.juaracoding.selspringbootjpa.utils.CsvReader;
+import com.juaracoding.selspringbootjpa.utils.ExcelReader;
 import com.juaracoding.selspringbootjpa.utils.LoggingFile;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -38,6 +39,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -49,7 +51,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/mgmnt")
-public class categoryProductController {
+public class CategoryProductController {
 
 
     private CategoryProductService categoryProductService;
@@ -62,30 +64,22 @@ public class categoryProductController {
     List<CategoryProduct> lsCPUpload = new ArrayList<CategoryProduct>();
 
     @Autowired
-    public categoryProductController(CategoryProductService categoryProductService) {
+    public CategoryProductController(CategoryProductService categoryProductService) {
+        strExceptionArr[0] = "CategoryProductController";
         this.categoryProductService = categoryProductService;
     }
 
     @PostMapping("/v1/s")
-    public ResponseEntity<Object> saveCategory(@Valid
-                                               @RequestBody CategoryProduct categoryProduct
-    ){
+    public ResponseEntity<Object> saveCategory(@Valid @RequestBody CategoryProduct categoryProduct){
 
         categoryProductService.saveDataCategory(categoryProduct);
 
         return new ResponseHandler().
                 generateResponse(ConstantMessage.SUCCESS_FIND_BY, HttpStatus.OK,null,null,null);
-        //FI01001 --> F = FAILED , I = INSERT, 01 = MODUL, 001 = LENGTH NAME MAX 40
-        //FI01002 --> F = FAILED , I = INSERT, 01 = MODUL, 002 = LENGTH DESC MAX 500
-        //FI01003 --> F = FAILED , I = INSERT, 01 = MODUL, 003 = DATETIME FORMAT
-        //SI01001 --> S = SUCCESS , I = INSERT , 01 = MODUL,
-
     }
 
     @PostMapping("/v1/sl")
-    public ResponseEntity<Object> saveCategoryList(@Valid
-                                                   @RequestBody List<CategoryProduct> listCategoryProduct
-    ){
+    public ResponseEntity<Object> saveCategoryList(@Valid@RequestBody List<CategoryProduct> listCategoryProduct){
 
         categoryProductService.saveAllCategory(listCategoryProduct);
 
@@ -93,44 +87,43 @@ public class categoryProductController {
                 generateResponse(ConstantMessage.SUCCESS_SAVE, HttpStatus.CREATED,null,null,null);
 
     }
-    @PostMapping("/v1/upl/batch")
-    public ResponseEntity<Object> uploadCsvMaster(@Valid
-                                                  @RequestParam("fileDemo")
-                                                      @RequestHeader  MultipartFile multipartFile
-    ) throws Exception {
+    @PostMapping("/v1/uplc/batch")
+    public ResponseEntity<Object> uploadCsvMaster(@Valid @RequestParam("fileDemo") @RequestHeader  MultipartFile multipartFile,WebRequest request) throws Exception {
 
-
-        try{
-            if(CsvReader.isCsv(multipartFile))
-            {
-                List<CategoryProduct> lsCP =  categoryProductService.saveUploadFile(
-                        csvToCategoryProduct(
-                                multipartFile.getInputStream()));
-
-                if(lsCP.size()==0)
-                {
-                    throw new ResourceNotFoundException(ConstantMessage.ERROR_UPLOAD_CSV+" -- "+multipartFile.getOriginalFilename());
-                }
-            }
-            else
-            {
-                throw new ResourceNotFoundException(ConstantMessage.ERROR_NOT_CSV_FILE+" -- "+multipartFile.getOriginalFilename());
-            }
-        }catch (Exception e)
+        if(CsvReader.isCsv(multipartFile))
         {
-            throw new Exception(ConstantMessage.ERROR_UPLOAD_CSV+multipartFile.getOriginalFilename());
+            return categoryProductService.saveUploadFile(
+                    csvToCategoryProduct(
+                            multipartFile.getInputStream()),multipartFile,request);
         }
-        return new ResponseHandler().generateResponse(ConstantMessage.SUCCESS_SAVE,
-                HttpStatus.CREATED,null,null,null);
+        else
+        {
+            return new ResponseHandler().generateResponse(ConstantMessage.ERROR_NOT_CSV_FILE+" -- "+multipartFile.getOriginalFilename(),
+                    HttpStatus.NOT_ACCEPTABLE,null,"FI01021",request);
+        }
 
+    }
+    @PostMapping("/v1/uplxls/batch")
+    public ResponseEntity<Object> uploadExcelMaster(@Valid
+                                                    @RequestParam("fileDemo")
+                                                    @RequestHeader  MultipartFile multipartFile,WebRequest request) throws Exception {
 
+        if(ExcelReader.isExcel(multipartFile))
+        {
+            return categoryProductService.saveUploadFile(
+                    excelToCategoryProduct(multipartFile.getInputStream()),
+                    multipartFile,
+                    request);
+        }
+        else
+        {
+            return new ResponseHandler().generateResponse(ConstantMessage.ERROR_NOT_EXCEL_FILE+" -- "+multipartFile.getOriginalFilename(),
+                    HttpStatus.NOT_ACCEPTABLE,null,"FI01021",request);
+        }
     }
 
     @PutMapping("/v1/sl/{id}")
-    public ResponseEntity<Object> updateCategoryById(@Valid
-                                                     @RequestBody CategoryProduct categoryProduct,
-                                                     @PathVariable Long id
-    ) throws Exception {
+    public ResponseEntity<Object> updateCategoryById(@Valid @RequestBody CategoryProduct categoryProduct, @PathVariable Long id) throws Exception {
 
         categoryProductService.updateCategory(categoryProduct,id);
 
@@ -163,12 +156,14 @@ public class categoryProductController {
 
     }
 
-    @GetMapping("/v1/fp/{size}/{page}/{sort}")
-    public ResponseEntity<Object> findAllPagination(
-            @PathVariable("size") Integer sizez,
-            @PathVariable("page") Integer pagez,
-            @PathVariable("sort") String sortz
-    ){
+    /*
+        PAGINATION SORTING DEFAULT by ID TANPA PARAMETER SORT BY YANG SPESIFIK DAN MASIH RETURN PAGE BUKAN LIST
+        Problem :
+        1. tidak dapat menggunakan validasi jika data kosong. artinya informasi hanya seadanya saja.
+        2. Informasi paging masih berantakan, informasi yang tidak perlu juga masih dikembalikan
+     */
+    @GetMapping("/v1/fp1/{size}/{page}/{sort}")
+    public ResponseEntity<Object> findAllPagination(@PathVariable("size") Integer sizez,@PathVariable("page") Integer pagez,@PathVariable("sort") String sortz){
 
         Pageable pageable = null;
         if(sortz.equalsIgnoreCase("desc"))
@@ -187,24 +182,17 @@ public class categoryProductController {
                         page,
                         null,
                         null);
-
-
     }
 
-
     /*
-       PAGINATION SORTING DEFAULT by ID TANPA PARAMETER SORT BY YANG SPESIFIK DAN RESPONSE SUDAH MENGGUNAKAN LIST
-       Sudah ada validasi semisal data kosong dan informasi di response lebih dinamis
-       Problem :
-          1. Data content sudah lebih baik namun informasi Paging tidak diikutsertakan, sehingga menghambat front end nantinya
-          2. belum menggunakan DTO data content untuk response masih belum rapih
-    */
+        PAGINATION SORTING DEFAULT by ID TANPA PARAMETER SORT BY YANG SPESIFIK DAN RESPONSE SUDAH MENGGUNAKAN LIST
+        Sudah ada validasi semisal data kosong dan informasi di response lebih dinamis
+        Problem :
+           1. Data content sudah lebih baik namun informasi Paging tidak diikutsertakan, sehingga menghambat front end nantinya
+           2. belum menggunakan DTO data content untuk response masih belum rapih
+     */
     @GetMapping("/v1/fp2/{size}/{page}/{sort}")
-    public ResponseEntity<Object> findAllPagination2(
-            @PathVariable("size") Integer sizez,
-            @PathVariable("page") Integer pagez,
-            @PathVariable("sort") String sortz
-    ){
+    public ResponseEntity<Object> findAllPagination2(@PathVariable("size") Integer sizez,@PathVariable("page") Integer pagez,@PathVariable("sort") String sortz){
 
         Pageable pageable = null;
         if(sortz.equalsIgnoreCase("desc"))
@@ -243,12 +231,8 @@ public class categoryProductController {
        2. belum menggunakan DTO data content untuk response masih belum rapih
     */
     @GetMapping("/v1/fpsb1/{size}/{page}/{sort}/{sortby}")
-    public ResponseEntity<Object> findPaginationSortBy1(
-            @PathVariable("size") Integer sizez,
-            @PathVariable("page") Integer pagez,
-            @PathVariable("sort") String sortz,
-            @PathVariable("sortby") String sortzBy
-    ){
+    public ResponseEntity<Object> findPaginationSortBy1(@PathVariable("size") Integer sizez,@PathVariable("page") Integer pagez,@PathVariable("sort") String sortz,@PathVariable("sortby") String sortzBy)
+    {
 
         Pageable pageable = null;
         String strSortBy = "";
@@ -306,12 +290,7 @@ public class categoryProductController {
        1. belum menggunakan DTO data content untuk response masih belum rapih
     */
     @GetMapping("/v1/fpsb2/{size}/{page}/{sort}/{sortby}")
-    public ResponseEntity<Object> findPaginationSortBy2(
-            @PathVariable("size") Integer sizez,
-            @PathVariable("page") Integer pagez,
-            @PathVariable("sort") String sortz,
-            @PathVariable("sortby") String sortzBy
-    ){
+    public ResponseEntity<Object> findPaginationSortBy2(@PathVariable("size") Integer sizez,@PathVariable("page") Integer pagez,@PathVariable("sort") String sortz,@PathVariable("sortby") String sortzBy){
 
         Pageable pageable = filterPagination(pagez,sizez,sortz,sortzBy);
         Page<CategoryProduct> page = categoryProductService.findAllCategoryByPage(pageable);
@@ -341,12 +320,7 @@ public class categoryProductController {
        1. kurang rapih karena DTO nya masih diembed di method request
     */
     @GetMapping("/v1/fpsbd1/{size}/{page}/{sort}/{sortby}")
-    public ResponseEntity<Object> findPaginationSortByDTO1(
-            @PathVariable("size") Integer sizez,
-            @PathVariable("page") Integer pagez,
-            @PathVariable("sort") String sortz,
-            @PathVariable("sortby") String sortzBy
-    ){
+    public ResponseEntity<Object> findPaginationSortByDTO1(@PathVariable("size") Integer sizez,@PathVariable("page") Integer pagez,@PathVariable("sort") String sortz,@PathVariable("sortby") String sortzBy){
 
         Pageable pageable = filterPagination(pagez,sizez,sortz,sortzBy);
         Page<CategoryProduct> page = categoryProductService.findAllCategoryByPage(pageable);
@@ -367,6 +341,9 @@ public class categoryProductController {
         }
 
         List<CategoryProductDTO> listCategoryProductDTO = modelMapper.map(listCategoryProduct, new TypeToken<List<CategoryProductDTO>>() {}.getType());
+
+//        CategoryProduct categoryProduct = new CategoryProduct();
+//        CategoryProductDTO categoryProductDTO = modelMapper.map(categoryProduct, new TypeToken<CategoryProductDTO>() {}.getType());
         objectMapper.put("data",listCategoryProductDTO);
         objectMapper.put("currentPage",page.getNumber());
         objectMapper.put("totalItems",page.getTotalElements());
@@ -386,12 +363,7 @@ public class categoryProductController {
        PAGINATION DENGAN SORT BY DAN RESPONSE SUDAH MENGGUNAKAN LIST SERTA VALIDASI SUDAH DIBUAT METHOD SENDIRI + DTO sudah dibuat method sendiri
     */
     @GetMapping("/v1/fpsbd2/{size}/{page}/{sort}/{sortby}")
-    public ResponseEntity<Object> findPaginationSortByDTO2(
-            @PathVariable("size") Integer sizez,
-            @PathVariable("page") Integer pagez,
-            @PathVariable("sort") String sortz,
-            @PathVariable("sortby") String sortzBy
-    ){
+    public ResponseEntity<Object> findPaginationSortByDTO2(@PathVariable("size") Integer sizez,@PathVariable("page") Integer pagez,@PathVariable("sort") String sortz,@PathVariable("sortby") String sortzBy){
 
         Pageable pageable = filterPagination(pagez,sizez,sortz,sortzBy);
         Page<CategoryProduct> page = categoryProductService.findAllCategoryByPage(pageable);
@@ -411,7 +383,7 @@ public class categoryProductController {
                             null);
         }
 
-        List<CategoryProduct> listCategoryProductDTO = modelMapper.map(listCategoryProduct, new TypeToken<List<CategoryProduct>>() {}.getType());
+        List<CategoryProductDTO> listCategoryProductDTO = modelMapper.map(listCategoryProduct, new TypeToken<List<CategoryProductDTO>>() {}.getType());
         Map<String, Object> mapResult = transformObject(objectMapper,listCategoryProductDTO,page);
 
         return new ResponseHandler().
@@ -435,6 +407,40 @@ public class categoryProductController {
     }
 
     private Pageable filterPagination(Integer page, Integer size, String sorts , String sortsBy)
+    {
+        Pageable pageable;
+        String strSortBy = "";
+
+        if(sortsBy.equalsIgnoreCase("id"))
+        {
+            strSortBy = "idCategoryProduct";
+        }
+        else if(sortsBy.equalsIgnoreCase("name"))
+        {
+            strSortBy = "nameCategoryProduct";
+        }
+        else if(sortsBy.equalsIgnoreCase("description"))
+        {
+            strSortBy = "strDescCategoryProduct";
+        }
+        else
+        {
+            strSortBy = "idCategoryProduct";
+        }
+
+        if(sorts.equalsIgnoreCase("desc"))
+        {
+            pageable = PageRequest.of(page,size, Sort.by(strSortBy).descending());
+        }
+        else
+        {
+            pageable = PageRequest.of(page,size, Sort.by(strSortBy).ascending());
+        }
+
+        return pageable;
+    }
+
+    private Pageable filterPaginationV2(Integer page, Integer size, String sorts , String sortsBy)
     {
         Pageable pageable;
         String strSortBy = "";
@@ -540,7 +546,6 @@ public class categoryProductController {
                         }
                         else
                         {
-//                            cProducts.setCreatedBy(Integer.parseInt(currentCell.getStringCellValue()));
                             cProducts.setCreatedBy((int) currentCell.getNumericCellValue());
                         }
 

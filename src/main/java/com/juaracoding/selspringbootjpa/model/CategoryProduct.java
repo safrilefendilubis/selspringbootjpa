@@ -18,17 +18,23 @@ import java.util.Date;
 @Entity
 @Table(name = "MstCategoryProduct")
 public class CategoryProduct {
+    /*
+  start audit trails
+   */
     @Column(name = "CreatedDate",nullable = false)
     private Date createdDate = new Date();
     @Column(name = "CreatedBy",nullable = false)
-    private int createdBy ;
+    private Integer createdBy ;
     @Column(name = "ModifiedDate")
     private Date modifiedDate;
     @Column(name = "ModifiedBy")
     private Integer modifiedBy;
 
-    @Column(name = "IsDelete")
+    @Column(name = "IsDelete",nullable = false)
     private Byte isDelete = 1;
+    /*
+  end audit trails
+   */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IDCategoryProduct")
@@ -52,11 +58,11 @@ public class CategoryProduct {
         this.createdDate = createdDate;
     }
 
-    public int getCreatedBy() {
+    public Integer getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(int createdBy) {
+    public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
     }
 
