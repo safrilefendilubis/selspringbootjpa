@@ -9,7 +9,6 @@ Version 1.1
 */
 
 import com.juaracoding.selspringbootjpa.configuration.OtherConfig;
-import com.juaracoding.selspringbootjpa.handler.ResourceNotFoundException;
 import com.juaracoding.selspringbootjpa.handler.ResponseHandler;
 import com.juaracoding.selspringbootjpa.model.Provinsi;
 import com.juaracoding.selspringbootjpa.repo.ProvinsiRepo;
@@ -20,10 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.sql.SQLException;
 import java.util.List;
 
 @Service

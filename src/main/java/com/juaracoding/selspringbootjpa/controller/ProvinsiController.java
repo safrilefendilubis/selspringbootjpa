@@ -9,16 +9,13 @@ Version 1.1
 */
 
 import com.juaracoding.selspringbootjpa.handler.ResponseHandler;
-import com.juaracoding.selspringbootjpa.model.CategoryProduct;
 import com.juaracoding.selspringbootjpa.model.Provinsi;
 import com.juaracoding.selspringbootjpa.service.ProvinsiService;
 import com.juaracoding.selspringbootjpa.utils.ConstantMessage;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
