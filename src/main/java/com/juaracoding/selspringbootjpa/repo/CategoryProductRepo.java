@@ -18,3 +18,6 @@ public interface CategoryProductRepo extends JpaRepository<CategoryProduct,Long>
 
 //    List<CategoryProduct> findByNameCategoryProduct(String value);
 }
+/*
+a
+ */

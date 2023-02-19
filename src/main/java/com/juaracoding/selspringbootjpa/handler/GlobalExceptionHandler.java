@@ -79,3 +79,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildResponseEntity(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,ConstantMessage.ERROR_UNEXPECTED,ex,request.getDescription(false),"X2236"));
 	}
 }
+/*
+a
+ */

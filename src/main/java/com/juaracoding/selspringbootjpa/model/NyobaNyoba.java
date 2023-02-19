@@ -25,3 +25,6 @@ public class NyobaNyoba {
 //    @Column(name = "IsDelete")
 //    private boolean isDelete = true;
 }
+/*
+a
+ */
